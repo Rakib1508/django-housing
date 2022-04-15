@@ -41,9 +41,17 @@ cd comfy-homes
 If you want to have a separate environment for your works, create one before running the `pip` commands and then point your project folder to access the corresponding Python interpreter. Then activate your package manager and run these commands:
 
 ```
-pip install django django-dotenv pandas pymongo psycopg redis boto3
+pip install django django-dotenv pandas psycopg2 redis boto3 mysqlclient djongo
 pip freeze > requirements.txt
 django-admin startproject core .
+```
+
+Check your database connections using the following commands:
+
+```
+python manage.py check --database auth_db
+python manage.py check --database app_db
+python manage.py check --database dynamic_db
 ```
 
 Create a `.env` file at the root directory and include these following variables in that file as these are secrets.
@@ -52,6 +60,8 @@ Create a `.env` file at the root directory and include these following variables
 - DEBUG (if 1, then True i.e. run development server; else False)
 - DJANGO_ALLOWED_HOST (host name as a string to be used when DEBUG is False)
 
+And all other variables in `settings.py` that are using the `os` module's `os.environ.get()` function to read values from your `.env` file.
+
 Run the following commands in a terminal with your package manager activated to get a secure secret key:
 
 ```
@@ -59,6 +69,8 @@ python manage.py shell
 from django.core.management.utils import get_random_secret_key
 get_random_secret_key()
 ```
+
+A list of all variables to be included in the `.env` will be given as the project reaches each checkpoints as it keeps growing. In the meantime, please refer to the `core/settings.py` file to see all the necessary variables that are being read from the `.env` file.
 
 [comment]: <> (## Usage)
 [comment]: <> (Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.)

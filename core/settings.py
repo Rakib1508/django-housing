@@ -64,9 +64,44 @@ WSGI_APPLICATION = 'core.wsgi.application'
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+    'default': {},
+    'auth_db': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': os.environ.get('AUTH_DB_NAME'),
+        'USER': os.environ.get('AUTH_DB_USER'),
+        'PASSWORD': os.environ.get('AUTH_DB_PASSWORD'),
+        'HOST': os.environ.get('AUTH_DB_HOST'),
+        'PORT': os.environ.get('AUTH_DB_PORT'),
+    },
+    'app_db': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.environ.get('APP_DB_NAME'),
+        'USER': os.environ.get('APP_DB_USER'),
+        'PASSWORD': os.environ.get('APP_DB_PASSWORD'),
+        'HOST': os.environ.get('APP_DB_HOST'),
+        'PORT': os.environ.get('APP_DB_PORT'),
+    },
+    'dynamic_db': {
+        'ENGINE': 'djongo',
+        'NAME': os.environ.get('DYNAMIC_DB_NAME'),
+        'ENFORCE_SCHEMA': str(os.environ.get('DYNAMIC_DB_ENFORCE_SCHEMA')) == "1",
+        'CLIENT': {
+            'host': os.environ.get('DYNAMIC_DB_HOST'),
+            'port': int(os.environ.get('DYNAMIC_DB_PORT')),
+            'username': os.environ.get('DYNAMIC_DB_USER'),
+            'password': os.environ.get('DYNAMIC_DB_PASSWORD'),
+            'authSource': os.environ.get('DYNAMIC_DB_AUTH_SOURCE'),
+            'authMechanism': os.environ.get('DYNAMIC_DB_AUTH_MECHANISM')
+        },
+        'LOGGING': {
+            'version': int(os.environ.get('DYNAMIC_DB_VERSION')),
+            'loggers': {
+                'djongo': {
+                    'level': os.environ.get('DYNAMIC_DB_DEBUG_LEVEL'),
+                    'propagate': str(os.environ.get('DYNAMIC_DB_PROPAGATE')) == "1",                        
+                }
+            },
+        },
     }
 }
 
