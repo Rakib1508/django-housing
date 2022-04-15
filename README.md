@@ -44,6 +44,7 @@ If you want to have a separate environment for your works, create one before run
 pip install django django-dotenv pandas psycopg2 redis boto3 mysqlclient djongo
 pip freeze > requirements.txt
 django-admin startproject core .
+python manage.py startapp comfy_auth
 ```
 
 Check your database connections using the following commands:
