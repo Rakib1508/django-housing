@@ -90,19 +90,17 @@ To get in touch, contact me via:
 
 This is just a application simulation, so things might not be as sophisticated as a real world app would be. But I still want to continue to develop this app for a while. With that in mind, this is the current plan to achieve step by step:
 
-```
-- [] Build necessary RDS schemas for PostgrsSQL database.
-- [] Dynamic role-based authentication system.
-- [] Build a scraper to start collecting housing data and set a storage in an Amazon S3 bucket which will be our data lake.
-- [] Build a data pipeline to process the housing data from S3 so that they can be used for the application.
-- [] Build an end-to-end data pipeline starting from data collection via scraper to storing production-ready processed data in MongoDB and RDS.
-- [] Enhance performance by integrating Redis.
-- [] Extend data pipeline to update Redis storage anytime there is any data updates.
-- [] Transaction gateway integration.
-- [] User data collection mechanism to collect valuable user data and store in S3 and relevant databases.
-- [] Bring in some machine learning models for recommendations and estimations.
+- [ ] Build necessary RDS schemas for PostgrsSQL database.
+- [ ] Dynamic role-based authentication system.
+- [ ] Build a scraper to start collecting housing data and set a storage in an Amazon S3 bucket which will be our data lake.
+- [ ] Build a data pipeline to process the housing data from S3 so that they can be used for the application.
+- [ ] Build an end-to-end data pipeline starting from data collection via scraper to storing production-ready processed data in MongoDB and RDS.
+- [ ] Enhance performance by integrating Redis.
+- [ ] Extend data pipeline to update Redis storage anytime there is any data updates.
+- [ ] Transaction gateway integration.
+- [ ] User data collection mechanism to collect valuable user data and store in S3 and relevant databases.
+- [ ] Bring in some machine learning models for recommendations and estimations.
 - To be continued!
-```
 
 ## Contributing
 
