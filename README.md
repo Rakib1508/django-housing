@@ -41,11 +41,13 @@ cd comfy-homes
 If you want to have a separate environment for your works, create one before running the `pip` commands and then point your project folder to access the corresponding Python interpreter. Then activate your package manager and run these commands:
 
 ```
-pip install django django-dotenv pandas psycopg2 redis boto3 mysqlclient djongo
+pip install django django-dotenv pandas psycopg2 redis hiredis boto3 mysqlclient djongo
 pip freeze > requirements.txt
 django-admin startproject core .
 python manage.py startapp comfy_auth
 ```
+
+Create your databases: one with MySQL (will be used for user authentication), one with PostgreSQL (will be used extensively for application purposes), and another with MongoDB (will be used as a data storage for user activities and other things for data analysis). After checking connections, create another in-memory database with Redis for cache supports.
 
 Check your database connections using the following commands:
 
@@ -53,6 +55,14 @@ Check your database connections using the following commands:
 python manage.py check --database auth_db
 python manage.py check --database app_db
 python manage.py check --database dynamic_db
+```
+
+Check your Redis connection using the following commands in Django shell and a True response after the last command confirms a successful connection:
+
+```
+python manage.py shell
+from redis import Redis
+Redis().ping()
 ```
 
 Create a `.env` file at the root directory and include these following variables in that file as these are secrets.
