@@ -127,3 +127,9 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# ignore static file storage
+data/
+data/*
+*storage/
+*storage/*

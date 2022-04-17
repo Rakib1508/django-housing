@@ -44,7 +44,7 @@ If you want to have a separate environment for your works, create one before run
 pip install django django-dotenv pandas psycopg2 redis hiredis boto3 mysqlclient djongo
 pip freeze > requirements.txt
 django-admin startproject core .
-python manage.py startapp comfy_auth
+python manage.py startapp accounts
 ```
 
 Create your databases: one with MySQL (will be used for user authentication), one with PostgreSQL (will be used extensively for application purposes), and another with MongoDB (will be used as a data storage for user activities and other things for data analysis). After checking connections, create another in-memory database with Redis for cache supports.
