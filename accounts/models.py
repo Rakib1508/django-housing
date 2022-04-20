@@ -1,7 +1,10 @@
 from phonenumber_field.modelfields import PhoneNumberField
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.models import AbstractUser
+from django.core.exceptions import ValidationError
+from datetime import datetime, timedelta
 from django.db import models
+import random
 
 
 class Account(AbstractUser):
@@ -40,13 +43,53 @@ class Account(AbstractUser):
             'unique': _('A user with that phone number already exists.'),
         },
     )
+    is_verified = models.BooleanField(
+        _('phone number verification status'),
+        default=False,
+        help_text=_('Designates whether a user can enable two factor authentication.'),
+    )
+    two_factor_authentication = models.BooleanField(
+        _('OTP-based authentication'),
+        default=False,
+        help_text=_('Designates whether a user uses two factor authentication.'),
+    )
+    verification_code = models.CharField(
+        _('one time verification code'),
+        blank=True, null=True, max_length=6,
+    )
+    verification_code_expiry = models.DateTimeField(
+        _('verification code expiry time'), blank=True, null=True,
+    )
+    verification_attempts = models.IntegerField(_('verification attempted'), default=0)
     
     def __str__(self):
         return self.username
     
-    def save(self, **kwargs):
+    @property
+    def set_preferred_name(self):
         # preferred name will be set to first name if blank
         if self.preferred_name is None:
             self.preferred_name = self.first_name
+    
+    def save(self, **kwargs):
+        if self.is_verified and not self.phone_number:
+            raise ValidationError('Cannot verify user without a phone number.')
+        
+        if self.two_factor_authentication and not self.is_verified:
+            raise ValidationError('Cannnot enable two factor authentication without a verified phone number')
         
         super().save(**kwargs)
+    
+    def verification_attempts_limiter(self):
+        if self.verification_attempts > 5:
+            self.is_active = False
+            self.save()
+            raise ValidationError('Account Frozen! Too many wrong attempts for verification!')
+    
+    def generate_random_verification_code(self):
+        code_number = random.randint(0, 999999)
+        self.verification_code = str(code_number).zfill(6)
+        self.verification_code_expiry = datetime.now() + timedelta(minutes=1)
+        self.verification_attempts = self.verification_attempts + 1
+        self.verification_attempts_limiter()
+        self.save()
