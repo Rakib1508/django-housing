@@ -2,6 +2,7 @@ from phonenumber_field.modelfields import PhoneNumberField
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ValidationError
+from django.contrib.auth import authenticate
 from datetime import datetime, timedelta
 from django.db import models
 import random
@@ -53,15 +54,26 @@ class Account(AbstractUser):
         default=False,
         help_text=_('Designates whether a user uses two factor authentication.'),
     )
-    allow_log_in = models.BooleanField(_('two factor authentication status'), default=False)
     verification_code = models.CharField(
-        _('one time verification code'),
-        blank=True, null=True, max_length=6,
+        _('one time verification code'), blank=True, null=True, max_length=6,
+        help_text=_('temporary password with an expiration in 1 minutes'),
     )
     verification_code_expiry = models.DateTimeField(
         _('verification code expiry time'), blank=True, null=True,
+        help_text=_('verification code expires after 1 minutes of creation'),
     )
-    verification_attempts = models.IntegerField(_('verification attempted'), default=0)
+    failed_verification_attempts = models.IntegerField(
+        _('consecutive failed verification attempted'), default=0, blank=True,
+        help_text=_('consecutive number of failed attempts for verification'),
+    )
+    failed_login_attempts = models.IntegerField(
+        _('consecutive failed login attempts'), default=0, blank=True,
+        help_text=_('consecutive number of failed attempts for logging in'),
+    )
+    disallow_login = models.DateTimeField(
+        _('account frozen temporarily'), blank=True, default=None,
+        help_text=_('account suspended for some time due to repeated failed login'),
+    )
     
     def __str__(self):
         return self.username
@@ -84,57 +96,95 @@ class Account(AbstractUser):
     def generate_random_verification_code(self):
         code_number = random.randint(0, 999999)
         self.verification_code = str(code_number).zfill(6)
-        self.verification_code_expiry = datetime.now() + timedelta(minutes=1)
+        self.verification_code_expiry = datetime.utcnow() + timedelta(minutes=1)
         self.save()
+        return self.verification_code
     
-    def verification_attempts_exceeded(self):
+    def failed_verification_attempts_exceeded(self):
         self.verification_code = None
-        self.verification_attempts = 0
+        self.failed_verification_attempts = 0
         self.verification_code_expiry = None
         self.save()
+        
+        message = 'Too many wrong attempts for verification! Please check your phone number verify phone number again!'
+        return message
+    
+    def freeze_user_account(self, action):
+        self.disallow_login = datetime.utcnow() + timedelta(minutes=30)
+        self.save()
+        message = f'Too many wrong attempts for {action}! Please try again after 30 minutes'
+        return message
     
     def check_verification_code(self, **kwargs):
+        response = {}
         if kwargs.get('user_code', None) == self.verification_code:
-            self.verification_attempts = 0
+            self.failed_verification_attempts = 0
             self.verification_code = None
             self.verification_code_expiry = None
             if datetime.now() <= self.verification_code_expiry:
                 self.is_verified = True
                 print('Verification successful')
+                response['success'] = True
+                response['message'] = 'Verification successful'
+            else:
+                response['success'] = False
+                response['message'] = 'Code expired. Try again'
             self.save()
         else:
-            if self.verification_attempts <= 5:
+            if self.failed_verification_attempts < 5:
                 print('Verification failed. OTP mismatch')
-                self.verification_attempts = self.verification_attempts + 1
+                self.failed_verification_attempts = self.failed_verification_attempts + 1
                 self.save()
+                response['success'] = False
+                response['message'] = 'Code does not match. Try again'
             else:
-                self.verification_attempts_exceeded()
-                raise ValidationError(
-                    'Too many wrong attempts for verification! '
-                    'Please verify phone number again!'
-                )
+                response['success'] = False
+                response['message'] = self.failed_verification_attempts_exceeded()
+        
+        return response
     
     def verify_two_factor_authentication(self, **kwargs):
+        response = {}
         if kwargs.get('user_code', None) == self.verification_code:
-            self.verification_attempts = 0
+            self.failed_login_attempts = 0
             self.verification_code = None
             self.verification_code_expiry = None
             if datetime.now() <= self.verification_code_expiry:
-                self.allow_log_in = True
                 print('Verification successful')
+                response['success'] = True
+                response['message'] = 'Verification successful'
+            else:
+                response['success'] = False
+                response['message'] = 'Code expired. Please try a new OTP'
             self.save()
         else:
-            if self.verification_attempts <= 5:
+            if self.failed_login_attempts < 5:
                 print('Verification failed. OTP mismatch')
-                self.verification_attempts = self.verification_attempts + 1
+                self.failed_login_attempts = self.failed_login_attempts + 1
                 self.save()
+                response['success'] = False
+                response['message'] = 'Code does not match. Try again'
             else:
-                self.verification_attempts_exceeded()
-                raise ValidationError(
-                    'Too many wrong attempts for verification! '
-                    'Please verify phone number again!'
-                )
+                response['success'] = False
+                response['message'] = self.freeze_user_account()
+        
+        return response
+    
+    def on_login_failure(self):
+        response = {'success': False, 'message': 'Login failed! Try again'}
+        self.failed_login_attempts = self.failed_login_attempts + 1
+        if self.failed_login_attempts > 5:
+            response['message'] = self.freeze_user_account()
+        self.save()
+    
+    def on_login_success(self):
+        self.failed_login_attempts = 0
+        self.save()
+        response = {'success': True, 'message': 'Login successful!'}
+        return response
     
     def on_log_out(self):
-        # add what values to update when user logs out
-        pass
+        self.last_login = datetime.utcnow()
+        self.save()
+        response = {'success': True, 'message': 'Logout successful!'}
+        return response
