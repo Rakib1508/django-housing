@@ -53,6 +53,7 @@ class Account(AbstractUser):
         default=False,
         help_text=_('Designates whether a user uses two factor authentication.'),
     )
+    allow_log_in = models.BooleanField(_('two factor authentication status'), default=False)
     verification_code = models.CharField(
         _('one time verification code'),
         blank=True, null=True, max_length=6,
@@ -80,16 +81,60 @@ class Account(AbstractUser):
         
         super().save(**kwargs)
     
-    def verification_attempts_limiter(self):
-        if self.verification_attempts > 5:
-            self.is_active = False
-            self.save()
-            raise ValidationError('Account Frozen! Too many wrong attempts for verification!')
-    
     def generate_random_verification_code(self):
         code_number = random.randint(0, 999999)
         self.verification_code = str(code_number).zfill(6)
         self.verification_code_expiry = datetime.now() + timedelta(minutes=1)
-        self.verification_attempts = self.verification_attempts + 1
-        self.verification_attempts_limiter()
         self.save()
+    
+    def verification_attempts_exceeded(self):
+        self.verification_code = None
+        self.verification_attempts = 0
+        self.verification_code_expiry = None
+        self.save()
+    
+    def check_verification_code(self, **kwargs):
+        if kwargs.get('user_code', None) == self.verification_code:
+            self.verification_attempts = 0
+            self.verification_code = None
+            self.verification_code_expiry = None
+            if datetime.now() <= self.verification_code_expiry:
+                self.is_verified = True
+                print('Verification successful')
+            self.save()
+        else:
+            if self.verification_attempts <= 5:
+                print('Verification failed. OTP mismatch')
+                self.verification_attempts = self.verification_attempts + 1
+                self.save()
+            else:
+                self.verification_attempts_exceeded()
+                raise ValidationError(
+                    'Too many wrong attempts for verification! '
+                    'Please verify phone number again!'
+                )
+    
+    def verify_two_factor_authentication(self, **kwargs):
+        if kwargs.get('user_code', None) == self.verification_code:
+            self.verification_attempts = 0
+            self.verification_code = None
+            self.verification_code_expiry = None
+            if datetime.now() <= self.verification_code_expiry:
+                self.allow_log_in = True
+                print('Verification successful')
+            self.save()
+        else:
+            if self.verification_attempts <= 5:
+                print('Verification failed. OTP mismatch')
+                self.verification_attempts = self.verification_attempts + 1
+                self.save()
+            else:
+                self.verification_attempts_exceeded()
+                raise ValidationError(
+                    'Too many wrong attempts for verification! '
+                    'Please verify phone number again!'
+                )
+    
+    def on_log_out(self):
+        # add what values to update when user logs out
+        pass
