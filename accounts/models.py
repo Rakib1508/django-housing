@@ -2,15 +2,18 @@ from phonenumber_field.modelfields import PhoneNumberField
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ValidationError
-from django.contrib.auth import authenticate
 from datetime import datetime, timedelta
 from django.db import models
 import random
 
 
 class Account(AbstractUser):
+    class GenderChoices(models.TextChoices):
+        MALE = 'm', _('Male')
+        FEMALE = 'f', _('Female')
+    
     email = models.EmailField(
-        _("email address"),
+        _("email address"), unique=True,
         error_messages = {
             'required': _('Must provide a valid email address.'),
             'invalid': _('Must provide a valid email address.'),
@@ -36,6 +39,10 @@ class Account(AbstractUser):
             'Name to be used for calling you by. '
             'If empty, first name will be used by default.'
         ),
+    )
+    gender = models.CharField(
+        _('gender'), max_length=1, blank=True, null=True,
+        choices=GenderChoices.choices,
     )
     phone_number = PhoneNumberField(
         _('phone number'), unique=True, blank=True, null=True,
@@ -74,6 +81,26 @@ class Account(AbstractUser):
         _('account frozen temporarily'), blank=True, default=None,
         help_text=_('account suspended for some time due to repeated failed login'),
     )
+    profile_picture = models.URLField(
+        _('profile picture or avatar'), blank=True,
+        help_text=_('profile picture will be used at most places alongside name'),
+    )
+    
+    class Meta:
+        indexes = [
+            models.Index(fields=['username'], name='username_idx'),
+            models.Index(fields=['email'], name='email_idx'),
+            models.Index(fields=['first_name'], name='first_name_idx'),
+            models.Index(fields=['last_name'], name='last_name_idx'),
+            models.Index(fields=['preferred_name'], name='preferred_name_idx'),
+            models.Index(fields=['gender'], name='gender_idx'),
+            models.Index(fields=['phone_number'], name='phone_number_idx'),
+            models.Index(fields=['first_name', 'last_name'], name='full_name_idx'),
+            models.Index(fields=['first_name', 'gender'], name='first_name_gender_idx'),
+            models.Index(fields=['last_name', 'gender'], name='last_name_gender_idx'),
+            models.Index(fields=['preferred_name', 'gender'], name='preferred_name_gender_idx'),
+            models.Index(fields=['first_name', 'last_name', 'gender'], name='full_name_gender_idx'),
+        ]
     
     def __str__(self):
         return self.username
@@ -83,6 +110,17 @@ class Account(AbstractUser):
         # preferred name will be set to first name if blank
         if self.preferred_name is None:
             self.preferred_name = self.first_name
+    
+    @property
+    def set_profile_picture(self):
+        # default profile picture will be set according to gender
+        if self.profile_picture is None:
+            if self.gender == self.GenderChoices.FEMALE:
+                # if female, then use the default female avatar
+                self.profile_picture = 'accounts/default-profile-picture-female.png'
+            else:
+                # if male or not specified, then use the default male avatar
+                self.profile_picture = 'accounts/default-profile-picture-male.png'
     
     def save(self, **kwargs):
         if self.is_verified and not self.phone_number:
