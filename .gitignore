@@ -133,3 +133,7 @@ data/
 data/*
 *storage/
 *storage/*
+static/
+static/*
+media/
+media/*
