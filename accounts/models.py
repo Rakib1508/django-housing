@@ -226,3 +226,9 @@ class Account(AbstractUser):
         self.save()
         response = {'success': True, 'message': 'Logout successful!'}
         return response
+
+
+class Developer(models.Model):
+    user = models.OneToOneField(Account, on_delete=models.CASCADE)
+    access_key = models.CharField(max_length=16)
+    developer_secret_key = models.CharField(max_length=32)
