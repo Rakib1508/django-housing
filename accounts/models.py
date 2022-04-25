@@ -5,6 +5,7 @@ from django.core.exceptions import ValidationError
 from django.db.models import UniqueConstraint
 from datetime import datetime, timedelta
 from django.db import models
+from hashlib import blake2b
 import random
 
 
@@ -79,7 +80,7 @@ class Account(AbstractUser):
         help_text=_('consecutive number of failed attempts for logging in'),
     )
     disallow_login = models.DateTimeField(
-        _('account frozen temporarily'), blank=True, default=None,
+        _('account frozen temporarily'), blank=True, null=True, default=None,
         help_text=_('account suspended for some time due to repeated failed login'),
     )
     profile_picture = models.URLField(
@@ -231,6 +232,7 @@ class Account(AbstractUser):
 
 class Developer(models.Model):
     user = models.OneToOneField(Account, on_delete=models.CASCADE)
+    developer_nickname = models.CharField(max_length=100, blank=True)
     access_key = models.CharField(max_length=16, unique=True)
     developer_secret_key = models.CharField(max_length=32, unique=True)
     
@@ -241,3 +243,19 @@ class Developer(models.Model):
                 name='unique_developer_access_credentials'
             ),
         ]
+    
+    def __str__(self):
+        return self.developer_nickname
+    
+    @property
+    def set_developer_nickname(self):
+        if not self.developer_nickname:
+            self.developer_nickname = self.user.preferred_name
+    
+    @property
+    def generate_random_developer_keys(self):
+        current_time = datetime.utcnow()
+        string = self.user.username + str(current_time)
+        identifier = bytes(string, 'utf=8')
+        self.access_key = blake2b(key=identifier, digest_size=8).hexdigest()
+        self.developer_secret_key = blake2b(key=identifier, digest_size=16).hexdigest()
