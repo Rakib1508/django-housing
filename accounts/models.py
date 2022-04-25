@@ -2,6 +2,7 @@ from phonenumber_field.modelfields import PhoneNumberField
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ValidationError
+from django.db.models import UniqueConstraint
 from datetime import datetime, timedelta
 from django.db import models
 import random
@@ -230,5 +231,13 @@ class Account(AbstractUser):
 
 class Developer(models.Model):
     user = models.OneToOneField(Account, on_delete=models.CASCADE)
-    access_key = models.CharField(max_length=16)
-    developer_secret_key = models.CharField(max_length=32)
+    access_key = models.CharField(max_length=16, unique=True)
+    developer_secret_key = models.CharField(max_length=32, unique=True)
+    
+    class Meta:
+        constraints = [
+            UniqueConstraint(
+                fields=['access_key', 'developer_secret_key'],
+                name='unique_developer_access_credentials'
+            ),
+        ]
