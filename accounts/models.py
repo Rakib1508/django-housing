@@ -252,7 +252,6 @@ class Developer(models.Model):
         if not self.developer_nickname:
             self.developer_nickname = self.user.preferred_name
     
-    @property
     def generate_random_developer_keys(self):
         current_time = datetime.utcnow()
         string = self.user.username + str(current_time)
