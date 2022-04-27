@@ -4,10 +4,7 @@ from django.db import models
 
 
 class Profile(models.Model):
-    name = models.CharField(
-        _('name to display'), max_length=300,
-        blank=True, null=True
-    )
+    name = models.CharField(_('name to display'), max_length=300)
     last_name_first = models.BooleanField(_('show last name first'), default=False)
     nicknames = ArrayField(
         models.CharField(max_length=50), blank=True, size=5,
