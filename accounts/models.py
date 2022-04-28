@@ -95,18 +95,18 @@ class Account(AbstractUser):
     
     class Meta:
         indexes = [
-            models.Index(fields=['username'], name='username_idx'),
-            models.Index(fields=['email'], name='email_idx'),
-            models.Index(fields=['first_name'], name='first_name_idx'),
-            models.Index(fields=['last_name'], name='last_name_idx'),
-            models.Index(fields=['preferred_name'], name='preferred_name_idx'),
-            models.Index(fields=['gender'], name='gender_idx'),
-            models.Index(fields=['phone_number'], name='phone_number_idx'),
-            models.Index(fields=['first_name', 'last_name'], name='full_name_idx'),
-            models.Index(fields=['first_name', 'gender'], name='first_name_gender_idx'),
-            models.Index(fields=['last_name', 'gender'], name='last_name_gender_idx'),
-            models.Index(fields=['preferred_name', 'gender'], name='preferred_name_gender_idx'),
-            models.Index(fields=['first_name', 'last_name', 'gender'], name='full_name_gender_idx'),
+            models.Index(fields=['username']),
+            models.Index(fields=['email']),
+            models.Index(fields=['first_name']),
+            models.Index(fields=['last_name']),
+            models.Index(fields=['preferred_name']),
+            models.Index(fields=['gender']),
+            models.Index(fields=['phone_number']),
+            models.Index(fields=['first_name', 'last_name']),
+            models.Index(fields=['first_name', 'gender']),
+            models.Index(fields=['last_name', 'gender']),
+            models.Index(fields=['preferred_name', 'gender']),
+            models.Index(fields=['first_name', 'last_name', 'gender']),
         ]
     
     def __str__(self):
@@ -249,8 +249,8 @@ class Developer(models.Model):
             ),
         ]
         indexes = [
-            models.Index(fields=['access_key'], name='access_key_idx'),
-            models.Index(fields=['developer_secret_key'], name='developer_secret_key_idx'),
+            models.Index(fields=['access_key']),
+            models.Index(fields=['developer_secret_key']),
         ]
     
     def __str__(self):

@@ -29,8 +29,7 @@ class Profile(models.Model):
     )
     last_name_first = models.BooleanField(_('show last name first'), default=False)
     nicknames = ArrayField(
-        _('add nicknames'),
-        models.CharField(max_length=50, blank=True),
+        models.CharField(_('add nicknames'), max_length=50, blank=True),
         default=list, size=5, help_text=_('add up to 5 nicknames'),
     )
     gender = models.CharField(
@@ -44,9 +43,8 @@ class Profile(models.Model):
     )
     date_joined = models.DateTimeField(auto_now_add=True)
     profile_tags = ArrayField(
-        _('add special tags to profile'),
-        models.CharField(max_length=50, blank=True), size=10, default=list,
-        help_text=_('add important tags so that others can find you easily'),
+        models.CharField(_('add special tags to profile'), max_length=50, blank=True),
+        size=10, default=list, help_text=_('add important tags so that others can find you easily'),
     )
     mail_accounts = models.JSONField(
         _('add emails'), null=True, blank=True,
@@ -75,14 +73,14 @@ class Profile(models.Model):
     
     class Meta:
         indexes = [
-            models.Index(fields=['email'], name='email_idx'),
-            models.Index(fields=['first_name'], name='first_name_idx'),
-            models.Index(fields=['last_name'], name='last_name_idx'),
-            models.Index(fields=['gender'], name='gender_idx'),
-            models.Index(fields=['first_name', 'last_name'], name='full_name_idx'),
-            models.Index(fields=['first_name', 'gender'], name='first_name_gender_idx'),
-            models.Index(fields=['last_name', 'gender'], name='last_name_gender_idx'),
-            models.Index(fields=['first_name', 'last_name', 'gender'], name='full_name_gender_idx'),
+            models.Index(fields=['username']),
+            models.Index(fields=['first_name']),
+            models.Index(fields=['last_name']),
+            models.Index(fields=['gender']),
+            models.Index(fields=['first_name', 'last_name']),
+            models.Index(fields=['first_name', 'gender']),
+            models.Index(fields=['last_name', 'gender']),
+            models.Index(fields=['first_name', 'last_name', 'gender']),
         ]
     
     def __str__(self):
