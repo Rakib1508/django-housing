@@ -4,16 +4,13 @@ from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ValidationError
 from django.db.models import UniqueConstraint
 from datetime import datetime, timedelta
+from core.utils import GenderChoices
 from django.db import models
 from hashlib import blake2b
 import random
 
 
 class Account(AbstractUser):
-    class GenderChoices(models.TextChoices):
-        MALE = 'm', _('Male')
-        FEMALE = 'f', _('Female')
-    
     email = models.EmailField(
         _("email address"), unique=True,
         error_messages = {
@@ -52,6 +49,14 @@ class Account(AbstractUser):
         error_messages={
             'unique': _('A user with that phone number already exists.'),
         },
+    )
+    is_active = models.BooleanField(
+        _('active'),
+        default=False,
+        help_text=_(
+            'Designates whether this user should be treated as active. '
+            'Unselect this instead of deleting accounts.'
+        ),
     )
     is_verified = models.BooleanField(
         _('phone number verification status'),
@@ -242,6 +247,10 @@ class Developer(models.Model):
                 fields=['access_key', 'developer_secret_key'],
                 name='unique_developer_access_credentials'
             ),
+        ]
+        indexes = [
+            models.Index(fields=['access_key'], name='access_key_idx'),
+            models.Index(fields=['developer_secret_key'], name='developer_secret_key_idx'),
         ]
     
     def __str__(self):

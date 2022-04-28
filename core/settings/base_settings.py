@@ -13,6 +13,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.postgres',
+    'psqlextra',
     
     # apps
     'accounts.apps.AccountsConfig',
@@ -70,7 +72,7 @@ DATABASES = {
         'PORT': os.environ.get('AUTH_DB_PORT'),
     },
     'app_db': {
-        'ENGINE': 'django.db.backends.postgresql',
+        'ENGINE': 'psqlextra.backend',
         'NAME': os.environ.get('APP_DB_NAME'),
         'USER': os.environ.get('APP_DB_USER'),
         'PASSWORD': os.environ.get('APP_DB_PASSWORD'),
