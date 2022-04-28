@@ -1,4 +1,4 @@
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 from .models import Account
 from profiles.models import Profile
@@ -15,3 +15,8 @@ def create_profile_signal(sender, instance, created, **kwargs):
             gender=instance.gender,
             mail_accounts={'primary': instance.email},
         )
+
+
+@receiver(post_delete, sender=Account)
+def delete_profile_signal(sender, instance, **kwargs):
+    Profile.objects.delete(username=instance.username)

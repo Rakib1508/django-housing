@@ -85,3 +85,7 @@ class Profile(models.Model):
     
     def __str__(self):
         return self.username
+    
+    def deactivate_profile(self):
+        self.is_active = False
+        self.save()
