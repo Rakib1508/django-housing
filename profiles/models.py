@@ -72,3 +72,18 @@ class Profile(models.Model):
         _('add workplaces'), null=True, blank=True,
         help_text=_('companies you have worked at'),
     )
+    
+    class Meta:
+        indexes = [
+            models.Index(fields=['email'], name='email_idx'),
+            models.Index(fields=['first_name'], name='first_name_idx'),
+            models.Index(fields=['last_name'], name='last_name_idx'),
+            models.Index(fields=['gender'], name='gender_idx'),
+            models.Index(fields=['first_name', 'last_name'], name='full_name_idx'),
+            models.Index(fields=['first_name', 'gender'], name='first_name_gender_idx'),
+            models.Index(fields=['last_name', 'gender'], name='last_name_gender_idx'),
+            models.Index(fields=['first_name', 'last_name', 'gender'], name='full_name_gender_idx'),
+        ]
+    
+    def __str__(self):
+        return self.username
