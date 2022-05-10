@@ -19,6 +19,7 @@ INSTALLED_APPS = [
     # apps
     'accounts.apps.AccountsConfig',
     'profiles.apps.ProfilesConfig',
+    'housings.apps.HousingsConfig',
     
     # 3rd Party
     'storages',
