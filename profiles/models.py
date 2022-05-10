@@ -70,6 +70,10 @@ class Profile(models.Model):
         _('add workplaces'), null=True, blank=True,
         help_text=_('companies you have worked at'),
     )
+    cover_picture = models.URLField(
+        _('add cover picture'), null=True, blank=True,
+        help_text=_('cover picture will be displayed in your profile page'),
+    )
     
     class Meta:
         indexes = [
