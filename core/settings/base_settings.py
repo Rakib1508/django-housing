@@ -14,12 +14,13 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.postgres',
+    'django.contrib.gis',
     'psqlextra',
     
     # apps
     'accounts.apps.AccountsConfig',
     'profiles.apps.ProfilesConfig',
-    'housings.apps.HousingsConfig',
+    # 'housings.apps.HousingsConfig',
     'locations.apps.LocationsConfig',
     
     # 3rd Party
