@@ -7,9 +7,8 @@ from profiles.models import Profile
 @receiver(post_save, sender=Account)
 def create_profile_signal(sender, instance, created, **kwargs):
     if created:
-        Profile.objects.create(
+        Profile.objects.using('default').create(
             username=instance.username,
-            email=instance.email,
             first_name=instance.first_name,
             last_name=instance.last_name,
             gender=instance.gender,
@@ -19,4 +18,4 @@ def create_profile_signal(sender, instance, created, **kwargs):
 
 @receiver(post_delete, sender=Account)
 def delete_profile_signal(sender, instance, **kwargs):
-    Profile.objects.delete(username=instance.username)
+    Profile.objects.using('default').delete(username=instance.username)

@@ -13,9 +13,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'django.contrib.postgres',
     'django.contrib.gis',
-    'psqlextra',
     
     # apps
     'accounts.apps.AccountsConfig',
@@ -62,10 +60,6 @@ WSGI_APPLICATION = 'core.wsgi.application'
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': 'db.sqlite3',
-    },
     'auth_db': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': os.environ.get('AUTH_DB_NAME'),
@@ -74,8 +68,8 @@ DATABASES = {
         'HOST': os.environ.get('AUTH_DB_HOST'),
         'PORT': os.environ.get('AUTH_DB_PORT'),
     },
-    'app_db': {
-        'ENGINE': 'psqlextra.backend',
+    'default': {
+        'ENGINE': 'django.contrib.gis.db.backends.postgis',
         'NAME': os.environ.get('APP_DB_NAME'),
         'USER': os.environ.get('APP_DB_USER'),
         'PASSWORD': os.environ.get('APP_DB_PASSWORD'),
@@ -106,7 +100,7 @@ DATABASES = {
     }
 }
 
-DATABASE_ROUTERS = ['core.routers.AuthRouter', 'core.routers.AppRouter']
+DATABASE_ROUTERS = ['core.routers.AuthRouter', 'core.routers.DefaultRouter']
 
 # Cache setup
 
@@ -156,3 +150,5 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+GDAL_LIBRARY_PATH = r'C:\OSGeo4W\bin\gdal304.dll'
