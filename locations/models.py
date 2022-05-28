@@ -8,6 +8,9 @@ class County(models.Model):
     county_name = models.CharField(_('county'), max_length=50)
     label = models.CharField(_('label for county'), max_length=50, blank=True)
     boundary = gis_models.PolygonField()
+    
+    def __str__(self):
+        return self.label
 
 
 class City(models.Model):
@@ -16,6 +19,9 @@ class City(models.Model):
     label = models.CharField(_('label for city'), max_length=50, blank=True)
     county = models.ForeignKey(County, on_delete=models.CASCADE)
     boundary = gis_models.PolygonField()
+    
+    def __str__(self):
+        return self.label
 
 
 class PostalCode(models.Model):
@@ -24,3 +30,6 @@ class PostalCode(models.Model):
     label = models.CharField(_('label for postal code'), max_length=50, blank=True)
     city = models.ForeignKey(City, on_delete=models.CASCADE)
     boundary = gis_models.PolygonField()
+    
+    def __str__(self):
+        return self.label
